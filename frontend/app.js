@@ -226,6 +226,7 @@ function renderResults() {
   for (const artwork of subset) {
     const node = dom.template.content.cloneNode(true);
     const item = node.querySelector('.result-item');
+    const imageWrap = node.querySelector('.item-image-wrap');
     const img = node.querySelector('.thumb');
     const title = node.querySelector('h3');
     const artist = node.querySelector('.artist');
@@ -234,6 +235,15 @@ function renderResults() {
 
     img.src = artwork.image?.url || '';
     img.alt = artwork.title || 'Artwork';
+
+    const width = Number(artwork.image?.width);
+    const height = Number(artwork.image?.height);
+    if (Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
+      imageWrap.style.aspectRatio = `${width} / ${height}`;
+    } else {
+      imageWrap.style.removeProperty('aspect-ratio');
+    }
+
     title.textContent = artwork.title || 'Untitled';
     artist.textContent = artwork.artistNames?.join(', ') || 'Unknown artist';
 

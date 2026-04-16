@@ -328,9 +328,8 @@ h1 {
 }
 
 .results-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(235px, 1fr));
-  gap: 12px;
+  column-count: 4;
+  column-gap: 12px;
 }
 
 .result-item {
@@ -340,6 +339,8 @@ h1 {
   overflow: hidden;
   background: #fff;
   cursor: pointer;
+  break-inside: avoid;
+  margin: 0 0 12px;
   transition: box-shadow 0.25s linear, transform 0.25s linear;
 }
 
@@ -352,14 +353,13 @@ h1 {
   position: relative;
   background: #efefef;
   overflow: hidden;
-  min-height: 220px;
 }
 
 .thumb {
+  display: block;
   width: 100%;
-  height: 100%;
-  min-height: 220px;
-  object-fit: cover;
+  height: auto;
+  object-fit: contain;
   transition: transform 0.35s ease, filter 0.35s ease;
 }
 
@@ -377,7 +377,7 @@ h1 {
 }
 
 .result-item:hover .thumb {
-  transform: scale(1.03);
+  transform: scale(1.015);
   filter: brightness(0.55);
 }
 
@@ -424,6 +424,10 @@ h1 {
     width: 100%;
     max-height: 290px;
   }
+
+  .results-grid {
+    column-count: 3;
+  }
 }
 
 @media (max-width: 720px) {
@@ -451,7 +455,13 @@ h1 {
   }
 
   .results-grid {
-    grid-template-columns: 1fr;
+    column-count: 1;
+  }
+}
+
+@media (max-width: 900px) and (min-width: 721px) {
+  .results-grid {
+    column-count: 2;
   }
 }
 

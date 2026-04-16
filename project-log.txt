@@ -55,3 +55,18 @@ Work Completed In This Chat
 	- moved palette and filters into a slide-in drawer on smaller screens
 	- added backdrop and Escape-to-close behavior
 - Updated frontend structure/styles/scripts and validated with no editor errors.
+
+[2026-04-16] Chat Summary
+User requested replacing fixed-grid card behavior with a masonry/Pinterest-style flow so tiles stop aligning in rigid rows, avoid empty gaps, and naturally stack by varying image heights driven by aspect ratio.
+
+Work Completed In This Chat
+- Replaced fixed results grid with masonry-style multi-column flow.
+- Removed fixed card/image minimum heights that caused sticky row alignment.
+- Added `break-inside: avoid` for clean vertical card stacking.
+- Added responsive masonry columns:
+	- desktop: 4 columns
+	- medium: 3 columns
+	- tablet: 2 columns
+	- small mobile: 1 column
+- Updated result rendering to apply per-artwork image aspect ratio from metadata when available, making tile heights reflect real artwork proportions.
+- Validated updated frontend files with no editor errors.
