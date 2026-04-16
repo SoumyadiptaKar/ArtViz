@@ -70,3 +70,37 @@ Work Completed In This Chat
 	- small mobile: 1 column
 - Updated result rendering to apply per-artwork image aspect ratio from metadata when available, making tile heights reflect real artwork proportions.
 - Validated updated frontend files with no editor errors.
+
+[2026-04-16] Chat Summary
+User requested cleanup of the controls UI: remove heavy nested boxed-card look, fix cramped and uneven spacing, improve label readability, and align filter/palette input and button layout so the interface feels deliberate and product-quality.
+
+Work Completed In This Chat
+- Reduced nested container heaviness in controls area:
+	- flattened desktop controls surfaces (removed stacked panel-card treatment)
+	- introduced cleaner section separation with subtle dividers
+- Improved form hierarchy and readability:
+	- added explicit filter section heading and helper copy
+	- changed labels to clearer uppercase micro-label style with spacing
+	- prevented squished fields by switching to a practical two-column filter grid
+	- made important fields span full width (artist, keyword, collection)
+- Improved alignment and rhythm:
+	- standardized gaps/padding across palette and filter blocks
+	- aligned action buttons with inputs and equalized button height
+	- optimized small-screen behavior (single-column fields and stacked actions)
+- Verified frontend HTML/CSS changes with no editor errors.
+
+[2026-04-16] Chat Summary
+User requested three improvements: (1) transform palette display from horizontal scrollable to vertical stacked like filter grid, (2) enhance palette matching algorithm to better align recommended artwork with selected colors, (3) keep hamburger toggle always visible for desk drawer control.
+
+Work Completed In This Chat
+- Restructured palette editor layout from horizontal scrollable flex to vertical grid:
+  - changed palette-editor from flex row to grid column layout
+  - transformed palette-item from 3-column grid to 2-column with color swatch and remove button
+  - adjusted spacing, padding, and borders for vertical flow
+  - resized color picker input (50x50px with 6px border-radius)
+- Improved palette-matching algorithm with weighted scoring:
+  - added color priority weighting where first palette color matters most (1x, second 0.5x, third 0.33x, etc.)
+  - maintains best-match distance calculation but now emphasizes dominant colors
+  - preserved normalization for consistent 0-100 score range
+- Made hamburger menu always visible on all screen sizes (removed media-query restriction).
+- Validated all changes with zero editor errors.

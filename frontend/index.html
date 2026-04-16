@@ -46,16 +46,20 @@
         </section>
 
         <section class="filters panel">
+          <div class="filters-head">
+            <h2>Filters</h2>
+            <p>Narrow results by artist, text, collection, and period.</p>
+          </div>
           <div class="filter-grid">
-            <label>
+            <label class="field-wide">
               Artist
               <input id="artistInput" type="text" placeholder="e.g. Albert Edelfelt" />
             </label>
-            <label>
+            <label class="field-wide">
               Keyword
               <input id="searchInput" type="text" placeholder="title, material, keyword" />
             </label>
-            <label>
+            <label class="field-wide">
               Collection
               <input id="collectionInput" type="text" placeholder="collection" />
             </label>
@@ -72,7 +76,7 @@
               <input id="limitInput" type="number" min="20" max="250" value="120" />
             </label>
           </div>
-          <div class="actions-row">
+          <div class="actions-row filters-actions">
             <button id="applyFiltersButton" class="primary-btn" type="button">Apply Filters</button>
             <button id="clearFiltersButton" class="ghost-btn" type="button">Clear Filters</button>
           </div>

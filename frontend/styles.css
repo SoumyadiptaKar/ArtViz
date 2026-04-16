@@ -76,7 +76,21 @@ body {
 
 .controls-drawer {
   display: grid;
-  gap: 10px;
+  gap: 18px;
+  padding: 8px 0;
+}
+
+.controls-drawer .panel {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.controls-drawer .panel + .panel {
+  padding-top: 14px;
+  border-top: 1px solid rgba(0, 0, 0, 0.09);
 }
 
 .content-stage {
@@ -126,7 +140,7 @@ h1 {
 
 .palette-card {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .palette-head {
@@ -139,44 +153,42 @@ h1 {
 .palette-head p {
   margin: 0;
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
 }
 
 .palette-editor {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 0;
   margin: 0;
   padding: 0;
   list-style: none;
-  min-height: var(--chip-h);
   border: 1px solid var(--line);
   border-radius: 10px;
-  overflow-x: auto;
-  overflow-y: hidden;
   background: #fbfbfb;
 }
 
 .palette-item {
   display: grid;
-  grid-template-columns: 58px 92px 34px;
+  grid-template-columns: 50px 1fr 30px;
   align-items: center;
-  gap: 6px;
-  min-width: 194px;
-  height: var(--chip-h);
-  padding: 8px;
-  border-right: 1px solid var(--line);
+  gap: 8px;
+  padding: 10px;
+  border-bottom: 1px solid var(--line);
 }
 
 .palette-item:last-child {
-  border-right: 0;
+  border-bottom: 0;
 }
 
 .palette-item input[type="color"] {
-  width: 52px;
-  height: 42px;
-  border: 0;
+  width: 50px;
+  height: 50px;
+  border: 1px solid var(--line);
   background: transparent;
   padding: 0;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 .palette-item input[type="text"] {
@@ -207,7 +219,7 @@ h1 {
 .actions-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 }
 
 .primary-btn,
@@ -244,29 +256,52 @@ h1 {
 
 .filters {
   display: grid;
-  gap: 10px;
+  gap: 12px;
+}
+
+.filters-head {
+  display: grid;
+  gap: 4px;
+}
+
+.filters-head p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
 }
 
 .filter-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 
 .filter-grid label {
   display: grid;
-  gap: 4px;
-  font-size: 0.8rem;
+  gap: 6px;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   color: var(--ink-soft);
-  font-weight: 600;
+  font-weight: 700;
+}
+
+.filter-grid label.field-wide {
+  grid-column: 1 / -1;
 }
 
 .filter-grid input {
   border: 1px solid var(--line);
-  border-radius: 2px;
-  padding: 9px;
+  border-radius: 8px;
+  padding: 10px 11px;
   background: #fff;
   color: var(--ink);
+  font-size: 0.93rem;
+}
+
+.filters-actions button {
+  flex: 1;
+  min-height: 42px;
 }
 
 .hero {
@@ -413,7 +448,7 @@ h1 {
   }
 
   .filter-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .hero {
@@ -437,7 +472,11 @@ h1 {
   }
 
   .filter-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
+  }
+
+  .filter-grid label.field-wide {
+    grid-column: auto;
   }
 
   .palette-item {
@@ -450,8 +489,16 @@ h1 {
   }
 
   .palette-actions {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     display: grid;
+  }
+
+  .filters-actions {
+    flex-direction: column;
+  }
+
+  .filters-actions button {
+    width: 100%;
   }
 
   .results-grid {
@@ -465,9 +512,11 @@ h1 {
   }
 }
 
+.menu-toggle {
+  display: inline-flex;}
+
 @media (max-width: 900px) {
-  .menu-toggle {
-    display: inline-flex;
+  .controls-drawer {
   }
 
   .controls-drawer {
@@ -476,13 +525,26 @@ h1 {
     left: 0;
     width: min(92vw, 380px);
     height: calc(100vh - 64px);
-    padding: 10px;
+    padding: 14px;
     overflow-y: auto;
-    background: #f3f3f1;
+    background: #f6f6f4;
     border-right: 1px solid var(--line);
     transform: translateX(-102%);
     transition: transform 0.25s ease;
     z-index: 25;
+  }
+
+  .controls-drawer .panel {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    padding: 10px;
+  }
+
+  .controls-drawer .panel + .panel {
+    border-top: 1px solid var(--line);
+    padding-top: 10px;
   }
 
   .drawer-backdrop {

@@ -134,8 +134,13 @@ function scoreArtwork(artwork, queryPalette) {
   }
 
   let total = 0;
+  let weight = 0;
 
-  for (const q of queryRgb) {
+  // Weight earlier colors more heavily - first color matters most
+  for (let i = 0; i < queryRgb.length; i += 1) {
+    const q = queryRgb[i];
+    const colorWeight = 1 / (i + 1); // First color: 1, second: 0.5, third: 0.33, etc.
+    
     let best = Infinity;
     for (const a of artRgb) {
       const distance = rgbDistance(q, a);
@@ -144,10 +149,11 @@ function scoreArtwork(artwork, queryPalette) {
       }
     }
 
-    total += best;
+    total += best * colorWeight;
+    weight += colorWeight;
   }
 
-  const averageDistance = total / queryRgb.length;
+  const averageDistance = total / weight;
   const normalized = Math.max(0, 1 - averageDistance / 441.6729);
   return Math.round(normalized * 1000) / 10;
 }
