@@ -33,6 +33,9 @@ const dom = {
   addColorButton: document.getElementById('addColorButton'),
   randomPaletteButton: document.getElementById('randomPaletteButton'),
   fromImageButton: document.getElementById('fromImageButton'),
+  menuToggle: document.getElementById('menuToggle'),
+  controlsDrawer: document.getElementById('controlsDrawer'),
+  drawerBackdrop: document.getElementById('drawerBackdrop'),
   applyFiltersButton: document.getElementById('applyFiltersButton'),
   clearFiltersButton: document.getElementById('clearFiltersButton'),
   refreshButton: document.getElementById('refreshButton'),
@@ -228,8 +231,6 @@ function renderResults() {
     const artist = node.querySelector('.artist');
     const meta = node.querySelector('.meta');
     const miniPalette = node.querySelector('.mini-palette');
-    const paletteBtn = node.querySelector('.palette-btn');
-    const detailsLink = node.querySelector('.details-link');
 
     img.src = artwork.image?.url || '';
     img.alt = artwork.title || 'Artwork';
@@ -241,7 +242,7 @@ function renderResults() {
 
     createSwatches(miniPalette, getArtworkPalette(artwork));
 
-    paletteBtn.addEventListener('click', () => {
+    item.addEventListener('click', () => {
       const nextPalette = getArtworkPalette(artwork);
       if (nextPalette.length) {
         state.palette = nextPalette;
@@ -249,9 +250,6 @@ function renderResults() {
         applyPaletteRanking();
       }
     });
-
-    detailsLink.href = `https://kokoelma.kansallisgalleria.fi/object/${encodeURIComponent(String(artwork.objectId))}`;
-    detailsLink.textContent = 'More Details';
 
     dom.resultsList.appendChild(node);
   }
@@ -277,7 +275,8 @@ function renderPaletteEditor() {
     const remove = document.createElement('button');
     remove.className = 'chip-btn';
     remove.type = 'button';
-    remove.textContent = 'Remove';
+    remove.textContent = 'X';
+    remove.title = 'Remove color';
 
     picker.addEventListener('input', (event) => {
       const next = normalizeHex(event.target.value);
@@ -359,6 +358,14 @@ function resetFilters() {
   dom.limitInput.value = '120';
 }
 
+function openDrawer() {
+  document.body.classList.add('drawer-open');
+}
+
+function closeDrawer() {
+  document.body.classList.remove('drawer-open');
+}
+
 function attachEvents() {
   dom.applyPaletteButton.addEventListener('click', () => {
     applyPaletteRanking();
@@ -385,6 +392,7 @@ function attachEvents() {
     try {
       await fetchArtworks();
       applyPaletteRanking();
+      closeDrawer();
     } catch (error) {
       dom.statusText.textContent = `Error: ${error.message}`;
     }
@@ -395,6 +403,7 @@ function attachEvents() {
     try {
       await fetchArtworks();
       applyPaletteRanking();
+      closeDrawer();
     } catch (error) {
       dom.statusText.textContent = `Error: ${error.message}`;
     }
@@ -405,8 +414,30 @@ function attachEvents() {
       await refreshCatalog();
       await fetchArtworks();
       applyPaletteRanking();
+      closeDrawer();
     } catch (error) {
       dom.statusText.textContent = `Error: ${error.message}`;
+    }
+  });
+
+  if (dom.menuToggle) {
+    dom.menuToggle.addEventListener('click', () => {
+      const isOpen = document.body.classList.contains('drawer-open');
+      if (isOpen) {
+        closeDrawer();
+      } else {
+        openDrawer();
+      }
+    });
+  }
+
+  if (dom.drawerBackdrop) {
+    dom.drawerBackdrop.addEventListener('click', closeDrawer);
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeDrawer();
     }
   });
 }

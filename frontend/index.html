@@ -19,67 +19,75 @@
         <p class="eyebrow">Interactive Data Viz</p>
         <h1>Palette Explorer</h1>
       </div>
-      <button id="refreshButton" class="ghost-btn" type="button">Refresh Catalog</button>
+      <div class="header-actions">
+        <button id="menuToggle" class="ghost-btn menu-toggle" type="button" aria-label="Open controls">☰</button>
+        <button id="refreshButton" class="ghost-btn" type="button">Refresh Catalog</button>
+      </div>
     </header>
 
     <main class="app">
-      <section class="palette-actions panel">
-        <button id="fromImageButton" class="ghost-btn" type="button">From Image</button>
-        <button id="randomPaletteButton" class="ghost-btn" type="button">Surprise Me</button>
-      </section>
+      <div id="drawerBackdrop" class="drawer-backdrop"></div>
+      <aside id="controlsDrawer" class="controls-drawer">
+        <section class="palette-actions panel">
+          <button id="fromImageButton" class="ghost-btn" type="button">From Image</button>
+          <button id="randomPaletteButton" class="ghost-btn" type="button">Surprise Me</button>
+        </section>
 
-      <section class="palette-card panel">
-        <div class="palette-head">
-          <h2>Palette</h2>
-          <p id="paletteHint">Use color chips or #colors/hex-hex-hex in URL</p>
-        </div>
-        <ul id="paletteEditor" class="palette-editor palette"></ul>
-        <div class="actions-row">
-          <button id="addColorButton" class="ghost-btn" type="button">Add Color</button>
-          <button id="applyPaletteButton" class="primary-btn" type="button">Find Matches</button>
-        </div>
-      </section>
+        <section class="palette-card panel">
+          <div class="palette-head">
+            <h2>Palette</h2>
+            <p id="paletteHint">Use color chips or #colors/hex-hex-hex in URL</p>
+          </div>
+          <ul id="paletteEditor" class="palette-editor palette"></ul>
+          <div class="actions-row">
+            <button id="addColorButton" class="ghost-btn" type="button">Add Color</button>
+            <button id="applyPaletteButton" class="primary-btn" type="button">Find Matches</button>
+          </div>
+        </section>
 
-      <section class="filters panel">
-        <div class="filter-grid">
-          <label>
-            Artist
-            <input id="artistInput" type="text" placeholder="e.g. Albert Edelfelt" />
-          </label>
-          <label>
-            Keyword
-            <input id="searchInput" type="text" placeholder="title, material, keyword" />
-          </label>
-          <label>
-            Collection
-            <input id="collectionInput" type="text" placeholder="collection" />
-          </label>
-          <label>
-            Year From
-            <input id="yearFromInput" type="number" placeholder="1700" />
-          </label>
-          <label>
-            Year To
-            <input id="yearToInput" type="number" placeholder="2000" />
-          </label>
-          <label>
-            Limit
-            <input id="limitInput" type="number" min="20" max="250" value="120" />
-          </label>
-        </div>
-        <div class="actions-row">
-          <button id="applyFiltersButton" class="primary-btn" type="button">Apply Filters</button>
-          <button id="clearFiltersButton" class="ghost-btn" type="button">Clear Filters</button>
-        </div>
-      </section>
+        <section class="filters panel">
+          <div class="filter-grid">
+            <label>
+              Artist
+              <input id="artistInput" type="text" placeholder="e.g. Albert Edelfelt" />
+            </label>
+            <label>
+              Keyword
+              <input id="searchInput" type="text" placeholder="title, material, keyword" />
+            </label>
+            <label>
+              Collection
+              <input id="collectionInput" type="text" placeholder="collection" />
+            </label>
+            <label>
+              Year From
+              <input id="yearFromInput" type="number" placeholder="1700" />
+            </label>
+            <label>
+              Year To
+              <input id="yearToInput" type="number" placeholder="2000" />
+            </label>
+            <label>
+              Limit
+              <input id="limitInput" type="number" min="20" max="250" value="120" />
+            </label>
+          </div>
+          <div class="actions-row">
+            <button id="applyFiltersButton" class="primary-btn" type="button">Apply Filters</button>
+            <button id="clearFiltersButton" class="ghost-btn" type="button">Clear Filters</button>
+          </div>
+        </section>
+      </aside>
 
-      <section class="results panel">
-        <div class="results-head">
-          <h2>Matched Artworks</h2>
-          <p id="statusText">Loading...</p>
-        </div>
-        <article id="heroCard" class="hero"></article>
-        <div id="resultsList" class="results-grid"></div>
+      <section class="content-stage">
+        <section class="results panel">
+          <div class="results-head">
+            <h2>Matched Artworks</h2>
+            <p id="statusText">Loading...</p>
+          </div>
+          <article id="heroCard" class="hero"></article>
+          <div id="resultsList" class="results-grid"></div>
+        </section>
       </section>
     </main>
 
@@ -87,15 +95,11 @@
       <article class="result-item">
         <div class="item-image-wrap">
           <img class="thumb" alt="Artwork thumbnail" />
-        </div>
-        <div class="result-copy">
-          <h3 class="item-title"></h3>
-          <p class="artist"></p>
-          <p class="meta"></p>
-          <div class="mini-palette"></div>
-          <div class="item-actions">
-            <button class="chip-btn palette-btn" type="button">Use Palette</button>
-            <a class="chip-btn details-link" target="_blank" rel="noopener noreferrer">More Details</a>
+          <div class="item-overlay">
+            <h3 class="item-title"></h3>
+            <p class="artist"></p>
+            <p class="meta"></p>
+            <div class="mini-palette"></div>
           </div>
         </div>
       </article>
