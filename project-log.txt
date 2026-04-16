@@ -1,0 +1,40 @@
+Project Change Log
+==================
+
+[2026-04-16] Chat Summary
+User requested a persistent log file that records ongoing work and includes a 20-50 word summary for each user message. They asked to begin frontend development next, aiming for a close visual and interaction style to Google Art Palette using the provided reference URL.
+
+Planned Work
+- Keep appending one 20-50 word summary per user message.
+- Build frontend similar to Art Palette workflow using backend APIs.
+
+Work Completed In This Chat
+- Created frontend app shell at frontend/index.html with palette editor, filter panel, hero artwork section, and matched results list.
+- Added visual styling in frontend/styles.css to emulate Art Palette-like layout, warm tones, swatch-forward design, and responsive behavior.
+- Implemented frontend logic in frontend/app.js:
+	- Parses palette from URL path (/colors/...) or hash (#colors/...)
+	- Fetches artworks from backend /api/artworks with includePalette=true
+	- Computes palette similarity and ranks artworks
+	- Renders hero artwork and result cards
+	- Supports filters, refresh, random palette, and artwork palette reuse
+- Added frontend/README.md with run instructions.
+- Smoke-tested both backend and frontend local servers.
+
+[2026-04-16] Chat Summary
+User asked to inspect the original Art Palette webpage source and scripts, then align the local frontend closer to that structure. Work focused on extracting reference classes, layout flow, and behavior patterns and applying a parity-focused UI refinement.
+
+Work Completed In This Chat
+- Inspected downloaded source artifacts from the original page:
+	- HTML structure in /tmp/artpalette.html
+	- CSS bundle in /tmp/palette_css.css
+	- JS bundle in /tmp/palette_bundle.js
+- Identified key reference layout and interaction patterns:
+	- sticky header + horizontal palette actions
+	- fixed-feel palette strip with add/remove controls
+	- tile-based results grid with strong image-first presentation
+	- route/history behavior around colors tokens and page states
+- Applied frontend refinement to better mirror those patterns:
+	- Updated frontend/index.html structure (main-header, palette-actions, palette strip, tile results)
+	- Reworked frontend/styles.css for stronger Art Palette-like visual hierarchy
+	- Updated frontend/app.js bindings for new controls and palette list item rendering
+- Validated changed frontend files with editor diagnostics (no errors).
