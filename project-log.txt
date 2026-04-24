@@ -104,3 +104,140 @@ Work Completed In This Chat
   - preserved normalization for consistent 0-100 score range
 - Made hamburger menu always visible on all screen sizes (removed media-query restriction).
 - Validated all changes with zero editor errors.
+
+[2026-04-17] Chat Summary
+User requested three major features: (1) reduce API calls via result caching keyed by filter parameters, (2) improve palette extraction using K-means clustering instead of quantization, (3) implement complete image upload workflow for palette extraction from user images.
+
+Work Completed In This Chat
+- Implemented client-side caching layer in frontend:
+  - added cache Map to store artworks by filter parameters
+  - modified fetchArtworks() to check cache first before calling API
+  - displays "(cached)" in status text when serving from cache
+  - cache survives filter changes within same session
+- Upgraded palette extraction algorithm to K-means clustering:
+  - implemented kmeansClustering() function with iterative centroid updates
+  - replaced quantization bucket approach with proper cluster centroid convergence
+  - produces more accurate palette discovery, especially for complex images
+  - maintains color weighting by cluster density for ranked palette output
+- Implemented full image upload workflow:
+  - added new backend endpoint /api/palette/extract (POST)
+  - endpoint accepts binary image data (up to 10MB), extracts palette via K-means
+  - frontend "From Image" button now opens file picker, reads image, sends to backend
+  - extracted palette automatically populates palette editor with top 7 colors
+  - displays extraction status and color count to user
+- Validated all changes with zero editor errors.
+
+[2026-04-18] Chat Summary
+User requested an exportable JSON dataset for later visualization, containing full artwork details and palettes for the filtered painting set while excluding non-painting works such as sketches, letters, and telegrams.
+
+Work Completed In This Chat
+- Extended the backend filter exclusions to keep letters and telegrams out of the artwork set.
+- Raised the artwork query limit in the backend to 2000 with a 1000 default so larger exports are practical.
+- Added backend/scripts/export-artwork-data.js to export the full filtered dataset with palettes from the running API in 2000-item chunks.
+- Generated backend/data/artworks-with-palettes.json.
+- Exported artwork count: 4165.
+- Validated the updated backend and export script with no errors.
+
+[2026-04-18] Chat Summary
+User requested a separate interactive web page showing a network graph for the full dataset, relating artists by color-palette similarity so they can explore how closely connected artists are by artwork color characteristics.
+
+Work Completed In This Chat
+- Added backend /api/network endpoint to generate artist relationship graph data from full catalog palettes.
+- Implemented artist-node aggregation and similarity-edge creation in backend/src/catalog.js:
+	- computes per-artist average RGB from artwork palettes
+	- builds weighted edges by palette similarity
+	- supports query parameters (minArtworks, maxArtists, maxEdges)
+- Created new dedicated network page frontend/network.html.
+- Added visualization styling in frontend/network.css.
+- Implemented interactive D3 force-graph in frontend/network.js with:
+	- zoom/pan, drag nodes, hover/click details
+	- sliders for minimum artworks, similarity threshold, and max artists
+	- live filtering and reload from backend
+- Added navigation link from main app to the network page.
+- Restarted backend and validated /api/network runtime response successfully.
+
+[2026-04-18] Chat Summary
+User requested adding a color picker to the artist network page so they can choose a target color and directly see which artists are the closest palette matches.
+
+Work Completed In This Chat
+- Added color matching controls to frontend/network.html:
+	- target color picker
+	- color-match threshold slider
+	- live top-matches panel
+- Updated frontend/network.js with color-distance matching logic:
+	- computes similarity between selected color and each artist average palette color
+	- highlights matched artists in the graph and dims non-matches
+	- updates top 8 match list with percentage and artwork count
+	- recalculates graph styling live when color/threshold changes
+- Added styling for color controls and match list in frontend/network.css.
+- Validated all network page files with no errors.
+
+[2026-04-18] Chat Summary
+User reported that the network graph was not visible after the color-matching additions.
+
+Work Completed In This Chat
+- Hardened the network renderer in frontend/network.js so it still draws the artist nodes even when the current filter leaves very few links.
+- Added safe handling for missing or sparse relationships and removed the hard early-exit that could collapse the graph into a blank state.
+- Gave the graph container a stronger explicit viewport height in frontend/network.css so the SVG has visible space on first render.
+- Revalidated the network page files with no errors.
+
+[2026-04-18] Chat Summary
+User requested that the artist details panel on the network page also show sample paintings for each artist, with six paintings being enough.
+
+Work Completed In This Chat
+- Extended the network payload in backend/src/catalog.js so each artist node carries up to six sample paintings from that artist.
+- Added painting title, image URL, year label, and collection metadata to each sample.
+- Updated frontend/network.js to render a six-item painting gallery inside the artist details panel.
+- Added styling in frontend/network.css for the sample thumbnail grid, image cards, placeholders, and metadata.
+- Validated the backend and network page files with no errors.
+
+[2026-04-23] Chat Summary
+User reported the network graph still not showing and requested deeper ingestion checks, additional interactive graphs using existing data, and related papers supporting network-graph methods.
+
+Work Completed In This Chat
+- Diagnosed ingestion mismatch:
+	- /api/network returned zero nodes with current defaults
+	- catalog cache had no palettes, while exported JSON had full palettes
+- Fixed backend ingestion for analytics endpoints in backend/src/catalog.js:
+	- added fallback source selection to use exported artworks-with-palettes.json when cache palettes are sparse
+	- tagged responses with dataSource
+- Added new backend insights endpoint in backend/src/server.js:
+	- GET /api/insights returns aggregated chart-ready data
+	- top artists, paintings by decade, dominant hue distribution, top collections
+- Added new interactive dashboard page:
+	- frontend/insights.html
+	- frontend/insights.css
+	- frontend/insights.js
+	- charts: top artists bar chart, decade timeline line chart, hue donut chart, top collections bar chart
+- Added navigation links to insights page from index and network pages.
+- Runtime validation:
+	- /api/network now returns non-zero graph data (source=exported-json, nodes=277, links=1200 in test query)
+	- /api/insights returns populated aggregates (total=4165)
+	- network and insights pages both return HTTP 200.
+
+[2026-04-24] Chat Summary
+User asked for a deeper ingestion check because the graph was not visible, requested additional interactive graphs using existing data, and asked for research-paper support for network graph usage.
+
+Work Completed In This Chat
+- Performed full ingestion diagnosis:
+	- confirmed /api/network had returned empty output in one run path
+	- verified palette-rich data exists in exported artworks JSON
+- Implemented robust analytics data fallback in backend/src/catalog.js:
+	- graph/insight endpoints now auto-read exported palette dataset when cache palette coverage is sparse
+- Implemented ColorNetVis-inspired graph module:
+	- added GET /api/colornet endpoint in backend/src/server.js
+	- built color co-occurrence network dataset (12 hue-bin nodes + weighted co-occurrence links)
+	- built artist × hue matrix dataset for top artists
+- Added new page set:
+	- frontend/colornet.html
+	- frontend/colornet.css
+	- frontend/colornet.js
+	- includes interactive color-network force graph and artist-hue heatmap matrix with controls
+- Added navigation links to ColorNet page from index, network, and insights pages.
+- Runtime verification:
+	- /api/network source=exported-json nodes=302 links=5000
+	- /api/insights source=exported-json total=4165
+	- /api/colornet source=exported-json total=4165 colorNodes=12 colorLinks=66 matrixRows=30
+	- network/insights/colornet pages all return HTTP 200
+- Validated all modified files with no editor errors.
+- Validated all modified files with no editor errors.

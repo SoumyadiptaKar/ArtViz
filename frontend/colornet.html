@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ColorNet Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./colornet.css" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+  </head>
+  <body>
+    <header class="main-header">
+      <div>
+        <p class="eyebrow">Interactive Data Viz</p>
+        <h1>ColorNet Explorer</h1>
+      </div>
+      <div class="header-actions">
+        <a href="./index.html" class="ghost-btn">Explorer</a>
+        <a href="./network.html" class="ghost-btn">Artist Network</a>
+        <a href="./insights.html" class="ghost-btn">Insights</a>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel controls">
+        <h2>Controls</h2>
+
+        <label>
+          Top artists in matrix
+          <input id="artistLimit" type="range" min="10" max="80" value="30" />
+          <span id="artistLimitValue">30</span>
+          <small style="color: #999; font-size: 0.75rem;">Shows top N artists in the Hue→Artist Flow and matrix</small>
+        </label>
+
+        <label>
+          Min edge weight
+          <input id="edgeThreshold" type="range" min="1" max="120" value="8" />
+          <span id="edgeThresholdValue">8</span>
+          <small style="color: #999; font-size: 0.75rem;">Minimum co-occurrence count to show color links</small>
+        </label>
+
+        <label>
+          Color search
+          <input id="targetColor" type="color" value="#8f806b" />
+          <span id="targetColorValue">#8F806B</span>
+          <small style="color: #999; font-size: 0.75rem;">Pick a color to find matching hues and artists</small>
+        </label>
+
+        <button id="reloadButton" class="primary-btn" type="button">Reload</button>
+        <div id="summary" class="summary"></div>
+        <div id="colorMatches" class="summary"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Color Co-occurrence Network</h2>
+        <p style="font-size: 0.85rem; color: #645d56; margin: 0 0 8px;">
+          <strong>What it shows:</strong> 12 hue bins (circle size = artwork count; line thickness = co-occurrence frequency).
+          Drag nodes to explore, scroll to zoom.
+        </p>
+        <div id="networkChart" class="chart"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Hue → Artist Flow</h2>
+        <p style="font-size: 0.85rem; color: #645d56; margin: 0 0 8px;">
+          <strong>What it shows:</strong> How many artworks per artist feature each hue.
+          <span style="color: #b4533a; font-weight: bold;">■ Red = Hue bins</span> (0–359°);
+          <span style="color: #4c7f87; font-weight: bold;">■ Teal = Artists</span>.
+          Numbers = artwork count.
+        </p>
+        <div id="flowChart" class="chart"></div>
+      </section>
+
+      <section class="panel matrix-panel">
+        <h2>Artist x Hue Matrix</h2>
+        <p style="font-size: 0.85rem; color: #645d56; margin: 0 0 8px;">
+          <strong>What it shows:</strong> Color intensity = artist's percentage of artworks in each hue.
+          Yellow (0%) → Red (100%).
+        </p>
+        <div id="matrixChart" class="chart matrix"></div>
+      </section>
+    </main>
+
+    <script src="./colornet.js" defer></script>
+  </body>
+</html>

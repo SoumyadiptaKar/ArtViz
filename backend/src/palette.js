@@ -5,8 +5,71 @@ function clampColor(value) {
   return Math.max(0, Math.min(255, Math.round(value)));
 }
 
-function quantizeChannel(value) {
-  return Math.round(value / 8) * 8;
+function kmeansClustering(points, k, maxIterations = 20) {
+  if (points.length === 0) return [];
+  if (k >= points.length) return points.map(p => [...p]);
+
+  // Initialize centroids by selecting k random points
+  const centroids = [];
+  const used = new Set();
+  
+  for (let i = 0; i < k && centroids.length < points.length; i++) {
+    let idx;
+    do {
+      idx = Math.floor(Math.random() * points.length);
+    } while (used.has(idx));
+    used.add(idx);
+    centroids.push([...points[idx]]);
+  }
+
+  let assignments = new Array(points.length);
+
+  for (let iter = 0; iter < maxIterations; iter++) {
+    // Assign each point to nearest centroid
+    for (let i = 0; i < points.length; i++) {
+      let minDist = Infinity;
+      let bestCentroid = 0;
+      
+      for (let j = 0; j < centroids.length; j++) {
+        const dist = 
+          Math.pow(points[i][0] - centroids[j][0], 2) +
+          Math.pow(points[i][1] - centroids[j][1], 2) +
+          Math.pow(points[i][2] - centroids[j][2], 2);
+        
+        if (dist < minDist) {
+          minDist = dist;
+          bestCentroid = j;
+        }
+      }
+      assignments[i] = bestCentroid;
+    }
+
+    // Update centroids
+    const newCentroids = [];
+    for (let j = 0; j < centroids.length; j++) {
+      const cluster = [];
+      for (let i = 0; i < points.length; i++) {
+        if (assignments[i] === j) {
+          cluster.push(points[i]);
+        }
+      }
+      
+      if (cluster.length > 0) {
+        const means = [
+          cluster.reduce((sum, p) => sum + p[0], 0) / cluster.length,
+          cluster.reduce((sum, p) => sum + p[1], 0) / cluster.length,
+          cluster.reduce((sum, p) => sum + p[2], 0) / cluster.length,
+        ];
+        newCentroids[j] = means;
+      } else {
+        newCentroids[j] = centroids[j];
+      }
+    }
+    centroids.length = 0;
+    centroids.push(...newCentroids);
+  }
+
+  return centroids.map(c => [clampColor(c[0]), clampColor(c[1]), clampColor(c[2])]);
 }
 
 async function extractPaletteFromImageUrl(imageUrl, options = {}) {
@@ -28,7 +91,7 @@ async function extractPaletteFromImageUrl(imageUrl, options = {}) {
     return [];
   }
 
-  const buckets = new Map();
+  const points = [];
   const step = Math.max(3, Math.floor(data.length / 20000));
 
   for (let index = 0; index < data.length; index += step) {
@@ -45,55 +108,117 @@ async function extractPaletteFromImageUrl(imageUrl, options = {}) {
       continue;
     }
 
-    const qr = quantizeChannel(r);
-    const qg = quantizeChannel(g);
-    const qb = quantizeChannel(b);
-    const key = `${qr},${qg},${qb}`;
-    const bucket = buckets.get(key) || { r: 0, g: 0, b: 0, count: 0 };
-
-    bucket.r += r;
-    bucket.g += g;
-    bucket.b += b;
-    bucket.count += 1;
-    buckets.set(key, bucket);
+    points.push([r, g, b]);
   }
 
-  const ranked = Array.from(buckets.values())
-    .map((bucket) => ({
-      r: clampColor(bucket.r / bucket.count),
-      g: clampColor(bucket.g / bucket.count),
-      b: clampColor(bucket.b / bucket.count),
-      count: bucket.count,
-    }))
-    .sort((a, b) => b.count - a.count);
-
-  const colors = [];
-  const minDistance = 34;
-
-  for (const color of ranked) {
-    if (colors.some((existing) => rgbDistance(existing, color) < minDistance)) {
-      continue;
-    }
-
-    colors.push(color);
-    if (colors.length >= colorCount) {
-      break;
-    }
-  }
-
-  if (!colors.length) {
+  if (!points.length) {
     return [];
   }
 
-  const total = colors.reduce((sum, color) => sum + color.count, 0);
+  const clusters = kmeansClustering(points, Math.min(colorCount, points.length));
 
-  return colors.map((color) => ({
-    hex: `#${toHex(color.r, color.g, color.b)}`,
-    rgb: [color.r, color.g, color.b],
-    ratio: Number((color.count / total).toFixed(4)),
-  }));
+  // Count points per cluster for weighting
+  const clusterCounts = new Array(clusters.length).fill(0);
+  for (let i = 0; i < points.length; i++) {
+    let minDist = Infinity;
+    let bestCluster = 0;
+    
+    for (let j = 0; j < clusters.length; j++) {
+      const dist = 
+        Math.pow(points[i][0] - clusters[j][0], 2) +
+        Math.pow(points[i][1] - clusters[j][1], 2) +
+        Math.pow(points[i][2] - clusters[j][2], 2);
+      
+      if (dist < minDist) {
+        minDist = dist;
+        bestCluster = j;
+      }
+    }
+    clusterCounts[bestCluster] += 1;
+  }
+
+  const total = clusterCounts.reduce((a, b) => a + b, 0);
+
+  return clusters
+    .map((cluster, i) => ({
+      hex: `#${toHex(cluster[0], cluster[1], cluster[2])}`,
+      rgb: cluster,
+      ratio: Number((clusterCounts[i] / total).toFixed(4)),
+    }))
+    .sort((a, b) => b.ratio - a.ratio);
 }
 
 module.exports = {
   extractPaletteFromImageUrl,
+  extractPaletteFromBuffer,
 };
+
+async function extractPaletteFromBuffer(buffer, options = {}) {
+  const colorCount = options.colorCount || 5;
+
+  const { data, info } = await sharp(buffer)
+    .resize(96, 96, { fit: 'inside', withoutEnlargement: true })
+    .removeAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+
+  if (!info.width || !info.height) {
+    return [];
+  }
+
+  const points = [];
+  const step = Math.max(3, Math.floor(data.length / 20000));
+
+  for (let index = 0; index < data.length; index += step) {
+    const r = data[index];
+    const g = data[index + 1];
+    const b = data[index + 2];
+
+    if (r === undefined || g === undefined || b === undefined) {
+      continue;
+    }
+
+    const brightness = (r + g + b) / 3;
+    if (brightness < 10 || brightness > 250) {
+      continue;
+    }
+
+    points.push([r, g, b]);
+  }
+
+  if (!points.length) {
+    return [];
+  }
+
+  const clusters = kmeansClustering(points, Math.min(colorCount, points.length));
+
+  // Count points per cluster for weighting
+  const clusterCounts = new Array(clusters.length).fill(0);
+  for (let i = 0; i < points.length; i++) {
+    let minDist = Infinity;
+    let bestCluster = 0;
+    
+    for (let j = 0; j < clusters.length; j++) {
+      const dist = 
+        Math.pow(points[i][0] - clusters[j][0], 2) +
+        Math.pow(points[i][1] - clusters[j][1], 2) +
+        Math.pow(points[i][2] - clusters[j][2], 2);
+      
+      if (dist < minDist) {
+        minDist = dist;
+        bestCluster = j;
+      }
+    }
+    clusterCounts[bestCluster] += 1;
+  }
+
+  const total = clusterCounts.reduce((a, b) => a + b, 0);
+
+  return clusters
+    .map((cluster, i) => ({
+      hex: `#${toHex(cluster[0], cluster[1], cluster[2])}`,
+      rgb: cluster,
+      ratio: Number((clusterCounts[i] / total).toFixed(4)),
+    }))
+    .sort((a, b) => b.ratio - a.ratio);
+}

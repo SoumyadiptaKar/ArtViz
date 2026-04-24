@@ -1,4 +1,5 @@
 const http = require('http');
+const querystring = require('querystring');
 const { port } = require('./env');
 const {
   state,
@@ -9,7 +10,11 @@ const {
   getFacetsResponse,
   getArtworkResponse,
   getArtworkPalette,
+  getArtistPaletteNetwork,
+  getInsightsSummary,
+  getColorNetworkSummary,
 } = require('./catalog');
+const { extractPaletteFromBuffer } = require('./palette');
 
 function sendJson(res, statusCode, payload) {
   const body = JSON.stringify(payload);
@@ -100,9 +105,56 @@ async function handleRequest(req, res) {
       return;
     }
 
+    if (pathname === '/api/palette/extract' && req.method === 'POST') {
+      let body = Buffer.alloc(0);
+      req.on('data', (chunk) => {
+        body = Buffer.concat([body, chunk]);
+        if (body.length > 10 * 1024 * 1024) {
+          // 10MB limit
+          res.writeHead(413, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Payload too large' }));
+          req.socket.destroy();
+        }
+      });
+
+      req.on('end', async () => {
+        try {
+          const palette = await extractPaletteFromBuffer(body, { colorCount: 5 });
+          sendJson(res, 200, { palette });
+        } catch (error) {
+          sendJson(res, 400, { error: error.message || 'Failed to extract palette' });
+        }
+      });
+
+      req.on('error', (error) => {
+        sendJson(res, 400, { error: error.message });
+      });
+      return;
+    }
+
     if (pathname === '/api/facets') {
       const facets = await getFacetsResponse();
       sendJson(res, 200, facets);
+      return;
+    }
+
+    if (pathname === '/api/network' && req.method === 'GET') {
+      const query = toQueryObject(searchParams);
+      const payload = await getArtistPaletteNetwork(query);
+      sendJson(res, 200, payload);
+      return;
+    }
+
+    if (pathname === '/api/insights' && req.method === 'GET') {
+      const payload = await getInsightsSummary();
+      sendJson(res, 200, payload);
+      return;
+    }
+
+    if (pathname === '/api/colornet' && req.method === 'GET') {
+      const query = toQueryObject(searchParams);
+      const payload = await getColorNetworkSummary(query);
+      sendJson(res, 200, payload);
       return;
     }
 
@@ -146,6 +198,10 @@ async function handleRequest(req, res) {
           '/health',
           '/api/status',
           '/api/refresh',
+          '/api/palette/extract',
+          '/api/network',
+          '/api/insights',
+          '/api/colornet',
           '/api/facets',
           '/api/artworks',
           '/api/artworks/:id',

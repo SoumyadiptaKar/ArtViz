@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Artist Palette Network</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./network.css" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  </head>
+  <body>
+    <div class="page-bg"></div>
+    <header class="main-header">
+      <div class="brand-block">
+        <p class="eyebrow">Interactive Data Viz</p>
+        <h1>Artist Palette Network</h1>
+      </div>
+      <div class="header-actions">
+        <a class="ghost-btn" href="./colornet.html">ColorNet</a>
+        <a class="ghost-btn" href="./insights.html">Insights</a>
+        <a class="ghost-btn" href="./index.html">Back To Explorer</a>
+      </div>
+    </header>
+
+    <main class="network-app">
+      <aside class="controls panel">
+        <h2>Graph Controls</h2>
+        <p class="helper">Artists are linked when their average artwork palettes are visually close.</p>
+
+        <label>
+          Minimum artworks per artist
+          <input id="minArtworks" type="range" min="1" max="20" value="2" />
+          <span id="minArtworksValue">2</span>
+        </label>
+
+        <label>
+          Similarity threshold
+          <input id="similarity" type="range" min="0.55" max="0.95" step="0.01" value="0.65" />
+          <span id="similarityValue">0.65</span>
+        </label>
+
+        <label>
+          Maximum artists
+          <input id="maxArtists" type="range" min="100" max="900" step="50" value="600" />
+          <span id="maxArtistsValue">600</span>
+        </label>
+
+        <label>
+          Match this color
+          <input id="colorPicker" type="color" value="#8B6A4E" />
+          <span id="colorPickerValue">#8B6A4E</span>
+        </label>
+
+        <label>
+          Color match threshold
+          <input id="colorThreshold" type="range" min="0.55" max="0.98" step="0.01" value="0.78" />
+          <span id="colorThresholdValue">0.78</span>
+        </label>
+
+        <div class="actions-row">
+          <button id="reloadButton" class="primary-btn" type="button">Reload Graph</button>
+        </div>
+
+        <div id="stats" class="stats"></div>
+        <div id="colorMatches" class="match-list"></div>
+      </aside>
+
+      <section class="graph-stage panel">
+        <div class="graph-head">
+          <h2>Color Relationship Network</h2>
+          <p id="statusText">Loading network...</p>
+        </div>
+        <div id="graphContainer" class="graph-container"></div>
+      </section>
+
+      <aside class="details panel">
+        <h2>Artist Details</h2>
+        <div id="detailsContent" class="details-content">Hover or click an artist node.</div>
+      </aside>
+    </main>
+
+    <script src="./network.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Palette Insights</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./insights.css" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+  </head>
+  <body>
+    <header class="main-header">
+      <div>
+        <p class="eyebrow">Interactive Data Viz</p>
+        <h1>Palette Insights Dashboard</h1>
+      </div>
+      <div class="header-actions">
+        <a href="./index.html" class="ghost-btn">Explorer</a>
+        <a href="./network.html" class="ghost-btn">Network</a>
+        <a href="./colornet.html" class="ghost-btn">ColorNet</a>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel summary">
+        <h2>Dataset Summary</h2>
+        <div id="summaryText">Loading...</div>
+      </section>
+
+      <section class="panel">
+        <h2>Top Artists</h2>
+        <div id="artistChart" class="chart"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Paintings Over Time</h2>
+        <div id="timelineChart" class="chart"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Dominant Hue Distribution</h2>
+        <div id="hueChart" class="chart"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Top Collections</h2>
+        <div id="collectionChart" class="chart"></div>
+      </section>
+    </main>
+
+    <script src="./insights.js" defer></script>
+  </body>
+</html>

@@ -2,6 +2,8 @@ const API_BASE = 'http://localhost:3001';
 
 const fallbackPalette = ['#2f403d', '#e9e6d9', '#b4533a', '#9b9270', '#ddbd67'];
 
+const cache = new Map();
+
 const state = {
   artworks: [],
   filtered: [],
@@ -15,6 +17,20 @@ const state = {
     limit: 120,
   },
 };
+
+function buildCacheKey(filters) {
+  return `artworks_${JSON.stringify(filters)}`;
+}
+
+function getCachedArtworks(filters) {
+  const key = buildCacheKey(filters);
+  return cache.get(key);
+}
+
+function setCachedArtworks(filters, artworks) {
+  const key = buildCacheKey(filters);
+  cache.set(key, artworks);
+}
 
 const dom = {
   paletteEditor: document.getElementById('paletteEditor'),
@@ -336,6 +352,14 @@ function randomColor() {
 async function fetchArtworks() {
   readFiltersFromInputs();
 
+  // Check cache first
+  const cached = getCachedArtworks(state.filters);
+  if (cached) {
+    state.artworks = cached;
+    dom.statusText.textContent = `Loaded ${state.artworks.length} artworks (cached)`;
+    return;
+  }
+
   const params = new URLSearchParams();
   params.set('includePalette', 'true');
   params.set('limit', String(Math.max(20, Math.min(250, state.filters.limit))));
@@ -355,6 +379,9 @@ async function fetchArtworks() {
 
   const payload = await response.json();
   state.artworks = Array.isArray(payload.items) ? payload.items : [];
+  
+  // Cache the results
+  setCachedArtworks(state.filters, state.artworks);
 }
 
 async function refreshCatalog() {
@@ -399,8 +426,38 @@ function attachEvents() {
   });
 
   if (dom.fromImageButton) {
-    dom.fromImageButton.addEventListener('click', () => {
-      dom.statusText.textContent = 'Image-based palette extraction UI is not enabled yet in this version.';
+    dom.fromImageButton.addEventListener('click', async () => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.addEventListener('change', async (event) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
+
+        try {
+          dom.statusText.textContent = 'Extracting palette from image...';
+          const buffer = await file.arrayBuffer();
+          const response = await fetch(`${API_BASE}/api/palette/extract`, {
+            method: 'POST',
+            body: buffer,
+          });
+
+          if (!response.ok) {
+            throw new Error(`Upload failed: ${response.status}`);
+          }
+
+          const data = await response.json();
+          if (data.palette && Array.isArray(data.palette)) {
+            // Populate palette with extracted colors
+            state.palette = data.palette.slice(0, 7).map(c => c.hex);
+            renderPaletteEditor();
+            dom.statusText.textContent = `Extracted ${state.palette.length} colors from image`;
+          }
+        } catch (error) {
+          dom.statusText.textContent = `Error: ${error.message}`;
+        }
+      });
+      input.click();
     });
   }
 
