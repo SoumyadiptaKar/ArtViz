@@ -1,0 +1,105 @@
+Here's a detailed description of every component in Figure 1, plus the algorithms behind each one, written so you can hand it directly to a Copilot chat to build it:
+
+Figure 1 — Full System Overview of ColorNetVis
+Figure 1 shows the complete ColorNetVis interface with six coordinated panels labeled A through F. Here is each one in detail:
+
+Panel A — Scope Specification Component (top bar)
+What it looks like:
+A horizontal control bar running across the top of the interface. It contains a text search box on the left labeled "Search", and a row of dropdown menus to the right labeled by painting attributes: Theme, Rendering method, Material, Shape, and a numeric input for the delta-E (ΔE) value. There is a "Search" button on the far right.
+What it does:
+This is the entry point. The researcher uses it to filter which paintings from the database are included in the current analysis. You can filter by painting name (single painting query), theme (e.g. landscape, flower-and-bird, figure), rendering method (e.g. heavy coloring, ink wash), material (silk, paper), or shape (handscroll, album leaf). These can be combined. The ΔE numeric input controls how aggressively similar colors get merged — a higher value produces fewer, broader color nodes.
+Algorithm:
+Simple database query with AND-logic across selected attribute filters. The ΔE value feeds directly into the color merging step of the bipartite network construction.
+
+Panel B — Network Visualization View (large central panel)
+What it looks like:
+A large canvas showing a force-directed network graph. Each node is a circle filled with the actual color it represents — so a cyan node is literally colored cyan, a dark brown node is dark brown, and so on. Node sizes vary. Edges between nodes are thin gray lines. The nodes cluster loosely into groups, with denser clusters of similar colors in certain regions. There is a "Transform" button at the top of this panel that switches between the bipartite view and the one-mode view. There is also a weight slider labeled 0.30 at the top that filters out edges below a certain cosine similarity threshold.
+Sub-panel B-1 — Node Heatmap (right side of panel B):
+A grid heatmap that appears alongside the network. The rows are a predefined set of color nodes the researcher has selected (clicked and added). The columns are the top 15 other colors most strongly related to those selected colors. Each cell shows the cosine similarity score between the row color and the column color as a number. The row and column headers are small colored circles representing the actual color.
+What it does:
+This is the core visualization. It shows two possible views toggled by the Transform button:
+
+Bipartite view: Two sets of nodes — painting nodes (represented as squares or neutral circles) on one side and color nodes (colored circles) on the other. Edges connect a painting to every color extracted from it.
+One-mode view: Only color nodes remain. Edges connect colors that co-occur in the same paintings. Edge weight equals cosine similarity. The weight slider lets you hide weak edges and focus on strong color relationships.
+
+Clicking a node shows its RGB value and centrality scores. The FR layout (Fruchterman-Reingold force-directed algorithm) positions nodes so that strongly connected nodes cluster together.
+Algorithms:
+
+Color extraction: Python extcolors package, tolerance=20, keeping colors with proportion between 0.05% and 80% of the painting.
+Bipartite network construction: For each painting i, create graph Gi = (Ui, Vi, Ei) where Ui is the painting node and Vi is its set of extracted color nodes. Merge all single-painting bipartite graphs into one global bipartite graph G = (U, V, E) by merging color nodes whose CIELAB2000 color difference ΔE is below the user-set threshold.
+CIELAB2000 color difference (ΔE): The standard perceptual color difference formula. Two colors are considered the same node if their ΔE is less than or equal to the threshold set in Panel A. The paper uses the range ΔE between 3 and 7 as the human-distinguishable range.
+One-mode projection: Project the bipartite graph G = (U, V, E) onto the color side V only. Two color nodes Vi and Vj get an edge if they share at least one common painting node in U.
+Cosine similarity edge weight:
+
+   Sim(Vi, Vj) = sum(xik * xjk for k in 1..m) / sqrt(sum(xik^2) * sum(xjk^2))
+Where m is the total number of paintings in scope, xik = 1 if color Vi appears in painting k, else 0. Similarly for xjk. This gives a value between 0 and 1 — higher means the two colors appear together in more of the same paintings.
+
+Layout algorithm: Fruchterman-Reingold (FR) force-directed layout. Nodes repel each other like magnets and edges pull connected nodes together. The result is that tightly connected color clusters visually group together on the canvas.
+Heatmap: For a user-selected set of colors, compute cosine similarity between each selected color and every other color in the network. Display the top 15 highest-similarity colors per selected color as a matrix. Cell values are the raw cosine similarity scores.
+
+
+Panel C — Color Node Attribute View (left sidebar)
+What it looks like:
+A vertical panel on the left with two sections:
+
+Top section (C, "Current Node"): Shows details of whichever color node is currently clicked. Displays the color swatch, its label (e.g. C104), and its RGB values (e.g. R:69 G:130 B:90). Below that are four numeric values: Degree centrality, Betweenness centrality (BC), Closeness centrality (CC), and Eigenvector centrality (EC).
+Bottom section (C-1, "Degree / EC"): Two horizontal bar charts side by side. The left bar chart shows the top 15 color nodes ranked by degree centrality. The right bar chart shows the top 15 ranked by eigenvector centrality. Each bar is filled with the actual color of that node, so you can visually identify which colors rank highest.
+
+What it does:
+Lets the researcher understand the structural importance of any color in the network. Degree centrality tells you how many other colors this color appears alongside. Eigenvector centrality tells you whether this color is connected to other important colors — a color that only appears with highly-connected colors scores high even if it doesn't appear in many paintings itself.
+Algorithms:
+
+Degree centrality: Number of edges a node has divided by (total nodes minus 1). Represents how universally a color co-occurs with others.
+Eigenvector centrality: Solved iteratively. Each node's score is proportional to the sum of its neighbors' scores. Formally, if A is the adjacency matrix and x is the centrality vector, then Ax = λx where λ is the largest eigenvalue. Computed using the power iteration method.
+Betweenness centrality: How often a node lies on the shortest path between two other nodes. Computed using Brandes' algorithm.
+Closeness centrality: Inverse of the average shortest path distance from a node to all other nodes.
+
+
+Panel D — Color Space View (bottom left)
+What it looks like:
+A 3D scatter plot rendered in RGB or HSV or LAB color space (the user can toggle between these with buttons labeled RGB, HSV, LAB at the top of the panel). Each point in the 3D space is a small dot colored with its actual color value. The three axes represent the three dimensions of the chosen color space — for RGB it's R, G, B axes; for LAB it's L, A, B axes. The view is interactive and can be rotated. Points cluster in regions corresponding to where colors concentrate in the database.
+What it does:
+Shows the raw, unmerged color distribution across all paintings in the current scope. Unlike the network view which works with merged color nodes, this view shows the original extracted colors exactly as they were pulled from the paintings. Clicking a dot reveals the RGB, HSV, and LAB values of that exact color, plus which painting it came from and all its attributes.
+Algorithm:
+Simple 3D scatter plot. Color conversion between RGB, HSV, and CIELAB color spaces using standard formulas. No network algorithm involved — this is a direct plot of the raw extcolors output. Its purpose is to let researchers verify the original data and serve as the foundation for the color search component.
+
+Panel E — Color Attribute Distribution View (bottom center)
+What it looks like:
+A Sankey diagram (also called an alluvial diagram or flow diagram). It has four vertical columns of blocks connected by flowing ribbons between them. From left to right the columns represent:
+
+Column 1 — Theme: The painting's subject matter (e.g. landscape 山水, flower-and-bird 花鸟, figure 人物)
+Column 2 — Color nodes: The actual color nodes in the current scope (each block is colored with its actual color)
+Column 3 — Rendering method: How the painting was made (e.g. heavy coloring 重彩, ink wash 水墨)
+Column 4 — Dynasty / Creation time: Which dynasty the painting belongs to (e.g. Song 宋朝)
+
+The height of each block within a column reflects the relative proportion of color in that attribute category. The ribbons flowing between columns show which colors belong to which themes, which rendering methods, and which dynasties. Wider ribbons mean more color volume flowing through that connection.
+What it does:
+Lets researchers see multi-attribute relationships at once. For example, you can visually trace that a specific cyan color appears primarily in landscape paintings, made with heavy coloring technique, from the Song Dynasty — all in one view without filtering separately.
+Algorithm:
+Standard Sankey/alluvial diagram layout. Nodes in each column are stacked vertically, sized proportionally to the sum of color proportions flowing through them. Ribbons are drawn as cubic Bezier curves between columns. The color of each ribbon matches the color node it originates from in column 2. No network algorithm involved — it is a flow visualization of relational attribute data from the TCPC database.
+
+Panel F — Color Search Component (right sidebar)
+What it looks like:
+A panel on the right side with a color input at the top where the researcher types in an RGB value (shown as three numeric boxes, e.g. 69, 130, 96). Below that is a radial/hierarchical tree diagram. The root node at the center is the queried color. Branching outward are successive layers of leaf nodes — each leaf is a colored circle representing a color in the network that is within ΔE < 10 of the previous layer. The tree has up to three levels. Each node in the tree is colored with its actual color.
+Sub-panel F-1 — Node Statistics (below the tree):
+A small treemap showing attribute statistics for whichever color node is clicked in the tree. Rectangles are sized by count and labeled with attribute values like theme, rendering method, shape, material. This gives a quick breakdown of where in the database this specific color appears.
+Sub-panel F-2 — Painting/Pigment Information (bottom of panel F):
+A list of actual painting thumbnails and metadata (ID, name, author, type) for paintings that contain the clicked color. A draggable slider lets you scroll through all matching paintings.
+What it does:
+Lets researchers start from any arbitrary RGB value — even one not in the network — and discover the nearest matching color nodes in a hierarchical structure. This is the recursive exploration tool. The tree shows how colors relate to each other by perceptual distance, not by co-occurrence. Clicking any node in the tree reveals what actual paintings contain that color.
+Algorithm:
+
+Root node matching: Take the input RGB value, convert to CIELAB, compute ΔE against every color node in the one-mode color network, select the node with the smallest ΔE as the root.
+Layer 1 expansion: From the root node, find all other color nodes in the network with ΔE < 10 from the root. These become the first layer of child nodes.
+Layer 2 expansion: From each layer-1 leaf node, find all remaining color nodes (not already in the tree) with ΔE < 10 from that leaf. These become the second layer.
+Tree layout: Rendered as a radial tree or a standard top-down tree with the root at center/top and leaves fanning outward. Each node is drawn as a circle filled with its actual color.
+Treemap (F-1): Standard treemap layout — rectangles sized proportionally to the count of that attribute value among paintings containing the selected color.
+
+
+Summary of All Algorithms Used
+AlgorithmWhere usedPurposeCIELAB2000 ΔE color differencePanels A, B, FMerging similar colors; hierarchical searchBipartite graph constructionPanel BLinking paintings to colorsCosine similarityPanel B, B-1Edge weights in one-mode networkFruchterman-Reingold layoutPanel BForce-directed node positioningDegree centralityPanel CHow universally a color is usedEigenvector centrality (power iteration)Panel CStructural importance of a colorBetweenness centrality (Brandes)Panel CHow often a color bridges othersCloseness centralityPanel CAverage distance to all other colors3D scatter plot with color space conversionPanel DRaw color distribution visualizationSankey/alluvial diagramPanel EMulti-attribute color flowHierarchical ΔE tree expansionPanel FColor search and similarity navigationTreemap layoutPanel F-1Attribute breakdown of a selected color
+        @keyframes ccInstallNudgeIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      

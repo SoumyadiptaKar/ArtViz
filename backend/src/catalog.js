@@ -76,6 +76,7 @@ const state = {
   refreshPromise: null,
   warmupPromise: null,
   lastError: null,
+  artworksWithPalettesCache: null,
 };
 
 async function ensureCacheDirectory() {
@@ -294,14 +295,24 @@ async function getSummary() {
 
 async function getArtworksResponse(query) {
   const catalog = await getOrRefreshCatalog();
-  const filtered = applyArtworksQuery(catalog.artworks, query);
   const offset = Math.max(0, Number(query.offset || 0));
   const limit = Math.max(1, Math.min(2000, Number(query.limit || 1000)));
   const includePalette = String(query.includePalette || '').toLowerCase() === 'true';
+  let sourceArtworks = catalog.artworks;
+
+  // Prefer exported precomputed palettes for fast includePalette responses.
+  if (includePalette) {
+    const precomputed = await loadArtworksWithPalettes();
+    if (Array.isArray(precomputed) && precomputed.length) {
+      sourceArtworks = precomputed;
+    }
+  }
+
+  const filtered = applyArtworksQuery(sourceArtworks, query);
   const slice = filtered.slice(offset, offset + limit);
 
   let items = slice;
-  if (includePalette && extractColors) {
+  if (includePalette && sourceArtworks === catalog.artworks && extractColors) {
     items = await pool(slice, colorWorkers, enrichPalette);
   }
 
@@ -344,18 +355,24 @@ async function getArtworkResponse(id, includePalette = false) {
 }
 
 async function loadArtworksWithPalettes() {
+  if (Array.isArray(state.artworksWithPalettesCache)) {
+    return state.artworksWithPalettesCache;
+  }
+
   try {
     const raw = await fs.readFile(artworksWithPalettesPath, 'utf8');
     const parsed = JSON.parse(raw);
-    
+
     if (Array.isArray(parsed)) {
+      state.artworksWithPalettesCache = parsed;
       return parsed;
     }
-    
+
     if (parsed && Array.isArray(parsed.artworks)) {
+      state.artworksWithPalettesCache = parsed.artworks;
       return parsed.artworks;
     }
-    
+
     return null;
   } catch (error) {
     return null;

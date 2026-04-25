@@ -30,3 +30,4 @@ python3 -m http.server 5173
 
 - `http://localhost:5173`
 - or `http://localhost:5173/#colors/2f403d-e9e6d9-b4533a-9b9270-ddbd67`
+- `http://localhost:5173/colornetvis.html` for the standalone ColorNetVis-inspired multi-panel lab page

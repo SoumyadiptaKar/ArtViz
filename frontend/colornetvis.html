@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ColorNetVis Lab</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./colornetvis.css" />
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12.3/dist/d3-sankey.min.js"></script>
+  </head>
+  <body>
+    <div class="page-bg"></div>
+    <header class="main-header">
+      <div class="brand-block">
+        <p class="eyebrow">Interactive Data Viz</p>
+        <h1>ColorNetVis Lab</h1>
+      </div>
+      <div class="header-actions">
+        <a class="ghost-btn" href="./index.html">Back To Explorer</a>
+      </div>
+    </header>
+
+    <section class="panel panel-a">
+      <label>
+        Search
+        <input id="searchInput" type="text" placeholder="painting title or keyword" />
+      </label>
+      <label>
+        Theme
+        <select id="themeSelect"><option value="">All</option></select>
+      </label>
+      <label>
+        Rendering
+        <select id="renderingSelect"><option value="">All</option></select>
+      </label>
+      <label>
+        Material
+        <select id="materialSelect"><option value="">All</option></select>
+      </label>
+      <label>
+        Shape
+        <select id="shapeSelect"><option value="">All</option></select>
+      </label>
+      <label>
+        Delta-E merge
+        <input id="deltaEInput" type="number" min="1" max="30" step="1" value="7" />
+      </label>
+      <button id="searchButton" class="primary-btn" type="button">Search</button>
+    </section>
+
+    <main class="cnv-grid">
+      <aside class="panel panel-c">
+        <h2>Node Attributes</h2>
+        <article class="current-node" id="currentNodeBox">
+          <p>Click a color node to inspect centrality metrics.</p>
+        </article>
+        <div class="bars-wrap">
+          <div>
+            <h3>Degree Top 15</h3>
+            <div id="degreeBars" class="bars"></div>
+          </div>
+          <div>
+            <h3>Eigenvector Top 15</h3>
+            <div id="eigenBars" class="bars"></div>
+          </div>
+        </div>
+      </aside>
+
+      <section class="panel panel-b">
+        <div class="panel-head">
+          <h2>Color Network</h2>
+          <div class="network-controls">
+            <label>
+              Weight
+              <input id="weightSlider" type="range" min="0.05" max="1" step="0.01" value="0.3" />
+              <span id="weightValue">0.30</span>
+            </label>
+            <button id="transformButton" class="ghost-btn" type="button">Transform: One-Mode</button>
+          </div>
+        </div>
+        <div class="network-layout">
+          <div id="networkCanvas" class="network-canvas"></div>
+          <div class="heatmap-wrap">
+            <h3>Node Heatmap</h3>
+            <div id="heatmap" class="heatmap"></div>
+          </div>
+        </div>
+      </section>
+
+      <aside class="panel panel-f">
+        <h2>Color Search</h2>
+        <div class="rgb-inputs">
+          <input id="rInput" type="number" min="0" max="255" value="69" />
+          <input id="gInput" type="number" min="0" max="255" value="130" />
+          <input id="bInput" type="number" min="0" max="255" value="96" />
+          <button id="colorSearchButton" class="primary-btn" type="button">Find</button>
+        </div>
+        <div id="treeCanvas" class="tree-canvas"></div>
+        <section>
+          <h3>Node Statistics</h3>
+          <div id="treemapCanvas" class="treemap-canvas"></div>
+        </section>
+        <section>
+          <h3>Painting Information</h3>
+          <div id="paintingList" class="painting-list"></div>
+        </section>
+      </aside>
+
+      <section class="panel panel-d">
+        <div class="panel-head">
+          <h2>Color Space</h2>
+          <div class="space-toggle">
+            <button type="button" data-space="rgb" class="space-btn active">RGB</button>
+            <button type="button" data-space="hsv" class="space-btn">HSV</button>
+            <button type="button" data-space="lab" class="space-btn">LAB</button>
+          </div>
+        </div>
+        <canvas id="spaceCanvas" width="460" height="250"></canvas>
+        <p id="spaceInfo" class="space-info">Click a point to inspect raw color samples.</p>
+      </section>
+
+      <section class="panel panel-e">
+        <h2>Color Attribute Distribution</h2>
+        <div id="sankeyCanvas" class="sankey-canvas"></div>
+      </section>
+    </main>
+
+    <footer class="status-row">
+      <p id="statusText">Loading artworks and building network...</p>
+    </footer>
+
+    <script src="./colornetvis.js" defer></script>
+  </body>
+</html>
