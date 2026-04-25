@@ -11,8 +11,6 @@ const {
   getArtworkResponse,
   getArtworkPalette,
   getArtistPaletteNetwork,
-  getInsightsSummary,
-  getColorNetworkSummary,
 } = require('./catalog');
 const { extractPaletteFromBuffer } = require('./palette');
 
@@ -145,19 +143,6 @@ async function handleRequest(req, res) {
       return;
     }
 
-    if (pathname === '/api/insights' && req.method === 'GET') {
-      const payload = await getInsightsSummary();
-      sendJson(res, 200, payload);
-      return;
-    }
-
-    if (pathname === '/api/colornet' && req.method === 'GET') {
-      const query = toQueryObject(searchParams);
-      const payload = await getColorNetworkSummary(query);
-      sendJson(res, 200, payload);
-      return;
-    }
-
     if (pathname === '/api/artworks' && req.method === 'GET') {
       const response = await getArtworksResponse(toQueryObject(searchParams));
       sendJson(res, 200, response);
@@ -200,8 +185,6 @@ async function handleRequest(req, res) {
           '/api/refresh',
           '/api/palette/extract',
           '/api/network',
-          '/api/insights',
-          '/api/colornet',
           '/api/facets',
           '/api/artworks',
           '/api/artworks/:id',

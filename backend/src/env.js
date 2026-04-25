@@ -30,4 +30,5 @@ module.exports = {
   extractColors: parseBoolean(process.env.FNG_EXTRACT_COLORS, true),
   colorWorkers: Math.max(1, parseNumber(process.env.FNG_COLOR_WORKERS, 8)),
   cachePath: path.join(backendRoot, 'data', 'catalog-cache.json'),
+  artworksWithPalettesPath: path.join(backendRoot, 'data', 'artworks-with-palettes.json'),
 };

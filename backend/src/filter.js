@@ -166,8 +166,8 @@ function normalizeArtwork(record, mediaBaseUrl) {
       inventoryNumber: cleanText(record.inventoryNumber),
       owner: cleanText(record.owner),
     }),
-    palette: [],
-    paletteStatus: 'not-generated',
+    palette: Array.isArray(record.palette) ? record.palette : [],
+    paletteStatus: Array.isArray(record.palette) && record.palette.length > 0 ? 'ready' : 'not-generated',
   };
 }
 
