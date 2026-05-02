@@ -1,0 +1,6 @@
+**/.DS_Store
+**/node_modules
+**/.git
+**/.github
+**/workspaceStorage
+**/*.log

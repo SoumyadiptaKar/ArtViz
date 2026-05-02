@@ -5,8 +5,8 @@
   "description": "Backend for the InteractiveDataViz FNG artwork browser",
   "main": "src/server.js",
   "scripts": {
-    "start": "node --env-file=.env src/server.js",
-    "dev": "node --watch --env-file=.env src/server.js"
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
   },
   "dependencies": {
     "sharp": "^0.34.4"

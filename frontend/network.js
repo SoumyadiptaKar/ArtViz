@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3001';
+const API_BASE = window.__API_BASE__ || (window.location.port === '8000' ? 'http://localhost:3001' : '/api');
 
 const dom = {
   container: document.getElementById('graphContainer'),

@@ -56,6 +56,11 @@ const NEGATIVE_TERMS = [
 ];
 
 function normalizeArtwork(record, mediaBaseUrl) {
+  // If already normalized (from fallback file), preserve it as-is
+  if (record.paletteStatus !== undefined && record.palette !== undefined) {
+    return record;
+  }
+
   const title = pickLocalizedText(record.title) || `Artwork ${record.objectId}`;
   const category = localizedVariants(record.category);
   const collection = localizedVariants(record.collection);
@@ -166,7 +171,7 @@ function normalizeArtwork(record, mediaBaseUrl) {
       inventoryNumber: cleanText(record.inventoryNumber),
       owner: cleanText(record.owner),
     }),
-    palette: Array.isArray(record.palette) ? record.palette : [],
+    palette: Array.isArray(record.palette) && record.palette.length > 0 ? record.palette : [],
     paletteStatus: Array.isArray(record.palette) && record.palette.length > 0 ? 'ready' : 'not-generated',
   };
 }

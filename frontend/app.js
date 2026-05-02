@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:3001';
+const API_BASE = window.__API_BASE__ || (window.location.port === '8000' ? 'http://localhost:3001' : '/api');
 
 const fallbackPalette = ['#2f403d', '#e9e6d9', '#b4533a', '#9b9270', '#ddbd67'];
 

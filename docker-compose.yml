@@ -1,0 +1,22 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: interactive-dataviz-backend
+    environment:
+      PORT: 3001
+      FNG_EXTRACT_COLORS: "true"
+      FNG_COLOR_WORKERS: 4
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: interactive-dataviz-frontend
+    depends_on:
+      - backend
+    ports:
+      - "8080:80"
+    restart: unless-stopped

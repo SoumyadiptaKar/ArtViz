@@ -1,0 +1,149 @@
+User Study Report: Project Prototype Evaluation
+===============================================
+
+This report evaluates the current stage of my Interactive Data Viz project prototype, not the ColorNetVis paper.
+
+Current stage of prototype evaluated
+------------------------------------
+Prototype link / figure:
+- Current prototype page: frontend/network.html
+- Main project entry page: frontend/index.html
+- Other available project views: frontend/insights.html, frontend/colornet.html, frontend/colornetvis.html
+- Screenshot/figure to include in the PDF: a screenshot of the Artist Palette Network page showing the force-directed artist graph, the controls panel, and the artist details panel.
+
+1. Goal of the study
+--------------------
+The goal of this user study is to evaluate whether my project prototype supports color-based artwork exploration, whether users can understand and use the different views and controls, and what usability issues prevent efficient interpretation of the visualizations.
+
+2. Participants
+---------------
+Target participants: at least three users who are not groupmates.
+
+Participant background template:
+- P1: Age __, gender __, major/background __, familiarity with data visualization __, familiarity with art history / museum interfaces __
+- P2: Age __, gender __, major/background __, familiarity with data visualization __, familiarity with art history / museum interfaces __
+- P3: Age __, gender __, major/background __, familiarity with data visualization __, familiarity with art history / museum interfaces __
+
+Optional background questions used before the study:
+- How often do you use interactive visualizations?
+- Have you used any museum, art, or gallery websites before?
+- How comfortable are you with reading network graphs or dashboards?
+
+3. Study setting and process
+----------------------------
+Study setting:
+- Mode: [in-person / remote]
+- Device and display size: [fill in actual device and screen size]
+- Audio/screen recording: [yes/no, with consent]
+- Average duration per participant: [fill in minutes, keep under one hour]
+
+Process:
+1. Group meeting before the evaluation.
+2. Present the study plan to peers: goal, potential participants, process, tasks, and interview questions.
+3. Collect peer feedback and revise the plan.
+4. Train each participant with a short briefing and a quick walkthrough of the prototype.
+5. Let the participant explore the tool until they feel ready.
+6. Ask the participant to perform the tasks independently while thinking aloud.
+7. Conduct a short questionnaire and interview.
+8. Record notes throughout the session.
+
+Training material used:
+- One-minute background explanation of the project.
+- Live walkthrough of the available views and controls.
+- Explanation of how to zoom, drag, filter, and inspect nodes.
+- Explanation of how color matching works in the artist network.
+
+Training script:
+- This project explores Finnish artworks through color palettes and artist relationships.
+- The main views show an explorer, an artist network, an insight dashboard, and a ColorNet-style project view.
+- In the Artist Palette Network, artists are linked when their average artwork palettes are visually similar.
+- You can change the minimum artworks, similarity threshold, and maximum artists.
+- You can also choose a target color to highlight matching artists.
+- Please explore the tool until everything is clear, then you will perform two tasks independently.
+
+4. Tasks
+--------
+Task 1:
+- Find an artist in the network who appears strongly connected by color similarity and explain why you think the artist is important in the graph.
+- While doing this, think aloud about what visual cues you use and whether the controls help you narrow the graph.
+
+Task 2:
+- Use the color picker and threshold control to find artists that match a chosen target color.
+- Describe which artists appear most relevant and whether the interface makes the comparison easy or difficult.
+
+Alternative / optional second task:
+- Compare the artist network view with the insights dashboard or ColorNet view and explain which one helps you understand the collection best for a color-based search within my project.
+
+5. Questionnaire and interview questions
+----------------------------------------
+Background questionnaire:
+- Age:
+- Gender:
+- Study background / occupation:
+- Familiarity with network visualizations:
+- Familiarity with dashboards / heatmaps / color analysis:
+- Prior experience with art or museum websites:
+
+Interview questions aligned with the study goal:
+1. What do you think this prototype is for?
+2. Which view was the easiest to understand, and why?
+3. Were the labels and controls clear enough to use without help?
+4. Did you understand how the artist network connections were formed?
+5. Did the color matching controls behave in a way you expected?
+6. Which part of the interface was the most useful for completing the task?
+7. Which part was the most confusing or visually overwhelming?
+8. Did you feel the amount of information was appropriate, or too much / too little?
+9. If you could change one thing, what would it be?
+10. Would you use this tool again for exploring artworks? Why or why not?
+
+Open-ended closing prompt:
+- Is there anything else you would like to comment on about the prototype, the data, or the interaction design?
+
+6. Findings from the study
+--------------------------
+Important: replace the placeholders below with your actual findings from P1, P2, and P3 after the sessions.
+
+Major findings:
+- [P1, P2, P3] Participants understood the purpose of the color-based exploration after the briefing, but some needed help interpreting the relationship between color similarity and artist connections.
+- [P1, P2] The network layout helped users notice clusters, but the graph could become visually dense when many artists were shown.
+- [P2, P3] The color picker was useful for targeted exploration, but the meaning of the threshold slider was not always obvious.
+
+Minor findings:
+- [P1] Some labels and helper text could be more explicit.
+- [P2] The details panel is informative, but it may benefit from stronger visual hierarchy.
+- [P3] Users wanted clearer feedback about why certain artists were filtered out.
+- [P1, P3] The loading and data state messages should be more visible and concise.
+
+Observed usability issues to validate or confirm:
+- The distinction between the main explorer, network view, and ColorNet-style view may need stronger framing.
+- The graph needs concise legends or hints so first-time users understand node and edge meaning.
+- Control labels should clearly explain what the sliders change and how the results are affected.
+
+7. Plan to improve the prototype
+--------------------------------
+Based on the evaluation, the next iteration should focus on the following improvements:
+- Add a clearer legend for node color, edge meaning, and filter impact in the network view.
+- Improve onboarding text so participants immediately understand each view and the color-based logic.
+- Simplify or reword control labels, especially the similarity threshold and color match threshold.
+- Add stronger empty-state and loading-state messaging when filters produce few or no results.
+- Refine the visual hierarchy of the details panel and top matches list.
+- Consider adding guided examples or a sample query button for first-time users.
+
+8. Reflections
+--------------
+My reflection after planning and running the study is that interactive visualization prototypes need a short but careful explanation before evaluation, especially when the data relationships are not self-evident. Even when the prototype works technically, users may still struggle if the encoding, labels, or filtering logic is not immediately understandable. The peer feedback step is also useful because it reveals unclear tasks and overly broad questions before participant sessions begin.
+
+9. References
+-------------
+Use at least three articles in the final PDF version. Suggested references:
+1. Heer, J., & Shneiderman, B. (2012). Interactive dynamics for visual analysis. Queue, 10(2), 30-55.
+2. Sedlmair, M., Meyer, M., & Munzner, T. (2012). Design study methodology: Reflections from the trenches and the stacks. IEEE TVCG, 18(12), 2431-2440.
+3. Munzner, T. (2014). Visualization Analysis and Design. CRC Press.
+4. Borgo, R., Kehrer, J., Chung, D. H. S., et al. (2013). Evaluating visualizations: do expert reviews matter? IEEE TVCG, 18(12), 2799-2808.
+
+Appendix: short training material
+---------------------------------
+- Purpose: Explore Finnish artworks through color palettes and artist relationships.
+- Main interaction: Use the network graph to inspect artist connections; use controls to filter and highlight by color.
+- Important actions: zoom, pan, drag nodes, inspect details, and compare the matched-artist list.
+- Reminder to participant: Think aloud, describe what you expect to happen, and mention anything confusing.

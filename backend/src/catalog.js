@@ -1,6 +1,6 @@
 const fs = require('fs/promises');
 const path = require('path');
-const { cachePath, objectsEndpoint, mediaBaseUrl, extractColors, colorWorkers, artworksWithPalettesPath } = require('./env');
+const { cachePath, objectsEndpoint, mediaBaseUrl, extractColors, colorWorkers } = require('./env');
 const { normalizeArtwork, filterPaintings, applyArtworksQuery, computeFacets } = require('./filter');
 const { extractPaletteFromImageUrl } = require('./palette');
 
@@ -76,7 +76,6 @@ const state = {
   refreshPromise: null,
   warmupPromise: null,
   lastError: null,
-  artworksWithPalettesCache: null,
 };
 
 async function ensureCacheDirectory() {
@@ -164,7 +163,29 @@ async function enrichPalette(artwork) {
 }
 
 async function buildCatalog() {
-  const rawObjects = await fetchAllObjects();
+  let rawObjects;
+  let dataSource = 'api';
+
+  // First try to use the fallback file with pre-computed palettes
+  try {
+    const fallbackPath = path.join(__dirname, '../data/artworks-with-palettes.json');
+    const fallbackData = await fs.readFile(fallbackPath, 'utf8');
+    const parsed = JSON.parse(fallbackData);
+    rawObjects = Array.isArray(parsed) ? parsed : parsed.artworks || [];
+    dataSource = 'fallback-file';
+    console.log(`Loaded ${rawObjects.length} artworks from fallback file with pre-computed palettes`);
+  } catch (fallbackError) {
+    // If fallback fails, try the API
+    console.warn(`Could not load fallback file: ${fallbackError.message}. Trying API...`);
+    try {
+      rawObjects = await fetchAllObjects();
+      dataSource = 'api';
+    } catch (apiError) {
+      console.error(`Both fallback and API failed: ${apiError.message}`);
+      throw new Error(`Could not load data from fallback file or API: ${apiError.message}`);
+    }
+  }
+
   const normalized = rawObjects.map((object) => normalizeArtwork(object, mediaBaseUrl));
   const paintings = filterPaintings(normalized);
   const catalog = {
@@ -175,6 +196,7 @@ async function buildCatalog() {
       totalPaintings: paintings.length,
       extractColors,
       colorWorkers,
+      dataSource,
     },
     updatedAt: new Date().toISOString(),
     artworks: paintings,
@@ -295,24 +317,14 @@ async function getSummary() {
 
 async function getArtworksResponse(query) {
   const catalog = await getOrRefreshCatalog();
+  const filtered = applyArtworksQuery(catalog.artworks, query);
   const offset = Math.max(0, Number(query.offset || 0));
   const limit = Math.max(1, Math.min(2000, Number(query.limit || 1000)));
   const includePalette = String(query.includePalette || '').toLowerCase() === 'true';
-  let sourceArtworks = catalog.artworks;
-
-  // Prefer exported precomputed palettes for fast includePalette responses.
-  if (includePalette) {
-    const precomputed = await loadArtworksWithPalettes();
-    if (Array.isArray(precomputed) && precomputed.length) {
-      sourceArtworks = precomputed;
-    }
-  }
-
-  const filtered = applyArtworksQuery(sourceArtworks, query);
   const slice = filtered.slice(offset, offset + limit);
 
   let items = slice;
-  if (includePalette && sourceArtworks === catalog.artworks && extractColors) {
+  if (includePalette && extractColors) {
     items = await pool(slice, colorWorkers, enrichPalette);
   }
 
@@ -354,48 +366,15 @@ async function getArtworkResponse(id, includePalette = false) {
   };
 }
 
-async function loadArtworksWithPalettes() {
-  if (Array.isArray(state.artworksWithPalettesCache)) {
-    return state.artworksWithPalettesCache;
-  }
-
-  try {
-    const raw = await fs.readFile(artworksWithPalettesPath, 'utf8');
-    const parsed = JSON.parse(raw);
-
-    if (Array.isArray(parsed)) {
-      state.artworksWithPalettesCache = parsed;
-      return parsed;
-    }
-
-    if (parsed && Array.isArray(parsed.artworks)) {
-      state.artworksWithPalettesCache = parsed.artworks;
-      return parsed.artworks;
-    }
-
-    return null;
-  } catch (error) {
-    return null;
-  }
-}
-
 async function getArtistPaletteNetwork(options = {}) {
   const minArtworks = Math.max(1, Number(options.minArtworks || 2));
   const maxArtists = Math.max(20, Math.min(1000, Number(options.maxArtists || 600)));
   const maxEdges = Math.max(50, Math.min(5000, Number(options.maxEdges || 1200)));
 
-  // Try to load artworks from the exported file with palettes
-  let artworks = await loadArtworksWithPalettes();
-  
-  // Fall back to catalog artworks if export file doesn't exist
-  if (!artworks) {
-    const catalog = await getOrRefreshCatalog();
-    artworks = catalog.artworks;
-  }
-
+  const catalog = await getOrRefreshCatalog();
   const artistMap = new Map();
 
-  for (const artwork of artworks) {
+  for (const artwork of catalog.artworks) {
     const paletteColors = paletteToRgbColors(artwork.palette);
     if (!paletteColors.length) {
       continue;
